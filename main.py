@@ -20,14 +20,12 @@ LINE_USER_ID = os.getenv('LINE_USER_ID')
 
 def build_arxiv_query(keywords):
     """キーワードリストからarXiv用の検索クエリ文字列を作成する"""
-    # 例: (all:"Advertising" OR all:"Marketing Automation") という形式にする
+
     query_parts = [f'all:"{k}"' for k in keywords]
     return "(" + " OR ".join(query_parts) + ")"
 
 def fetch_arxiv_papers(query, num_papers=5):
-    """arXiv APIから本物の論文データを取得する"""
-    url = "http://export.arxiv.org/api/query"
-    # 毎回同じ結果にならないよう、少しランダムに開始位置をずらす
+    url = "https://export.arxiv.org/api/query"
     random_start = random.randint(0, 20)
     
     params = {
@@ -38,8 +36,12 @@ def fetch_arxiv_papers(query, num_papers=5):
         "sortOrder": "descending"
     }
     
+    headers = {
+        "User-Agent": "DailyArxivResearchBot/1.0 (mailto:your_email@example.com)"
+    }
+    
     try:
-        response = requests.get(url, params=params, timeout=15)
+        response = requests.get(url, params=params, headers=headers, timeout=15)
         response.raise_for_status()
         root = ET.fromstring(response.text)
         ns = {'atom': 'http://www.w3.org/2005/Atom'}
@@ -77,7 +79,9 @@ def summarize_paper(paper_data, client):
     try:
         response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         return response.text
-    except:
+    except Exception as e:
+        # 変更点4: Actionsのログに残るようにエラーを print する
+        print(f"Gemini API Error ({paper_data['title']}): {e}")
         return "要約生成に失敗しました。"
 
 def send_to_line(message):
