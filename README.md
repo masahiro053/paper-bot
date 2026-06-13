@@ -1,41 +1,47 @@
 # Daily AI Research Bot for Marketing Optimization
 
-## 概要
-最新のデータサイエンスおよびマーケティング領域の学術論文（arXiv）を毎朝自動で取得し、
+[![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-Automated-2088FF.svg?logo=github-actions)](https://github.com/features/actions)
+[![Gemini API](https://img.shields.io/badge/Gemini-2.5_Flash-8E75B2.svg)](https://aistudio.google.com/)
+[![LINE API](https://img.shields.io/badge/LINE-Messaging_API-00C300.svg?logo=LINE)](https://developers.line.biz/)
 
-LLMを用いて「ビジネス実務に即した形式」に要約してLINEへ配信する自動化パイプラインです。
+## 📌 概要 (Overview)
+本アプリケーションは、最新のデータサイエンスおよびマーケティング領域の学術論文（arXiv）を毎朝自動で取得し、LLM（Gemini 2.5 Flash）を用いて**「ビジネス実務に即した形式」に要約してLINEへ定期配信する自動化パイプライン**です。
 
-## 着想の背景（Motivation）
-日々のメディアプランニングやデータ分析業務において、Marketing Mix Modeling（MMM）や因果推論、状態空間モデルといった高度な統計手法の最新トレンドをキャッチアップすることは不可欠です。しかし、英語の学術論文を毎日スクリーニングし、実務への応用可能性を評価するには膨大な時間がかかります。
-この課題を解決するため、「専門的で難解な一次情報を、通勤時間中のスマートフォンで直感的に理解でき、かつ明日の業務のアイデアの種になるレベルまで咀嚼して届ける」ことを目的とした自動化システムの開発に至りました。
+データアナリストやメディアプランナーが、状態空間モデルや因果推論などの高度なモデリング手法の最新トレンドをキャッチアップする際、難解な英語論文をスクリーニングする膨大な手間を削減します。通勤時間のスマートフォン閲覧に最適化されたフォーマットで、明日の意思決定に繋がる「具体的なアイデアの種」を毎朝07:00に提供します。
 
-## 主な機能と特徴（Features）
+## ✨ 主な機能 (Key Features)
 
-* **完全自動の定期配信パイプライン**
-    GitHub ActionsのCron機能を活用し、毎朝07:00に最新の論文情報がLINEに届くサーバーレスな定期実行環境を構築しています。
-* **実務解像度に合わせた高度な検索ロジック**
-    arXiv APIに対して、大カテゴリ（Marketing Data, Advertising等）と小カテゴリ（Bayesian, Gradient Boosting等）を掛け合わせたAND検索クエリを動的に生成し、ノイズを排除した精度の高いターゲティングを実現しています。
-* **ビジネスパーソン向けのLLMプロンプトエンジニアリング**
-    Gemini 2.5 Flash APIを活用し、単なる直訳ではなく「ターゲット読者（ビジネスパーソン）」を指定した上で、「背景」「賢いアプローチ」「結論」「実務へのヒント」という4つの構造化されたフォーマットでの出力を強制しています。これにより、学術的な正確性を保ちつつ、LINEのチャット画面での圧倒的な視認性と納得感を実現しました。
-* **関心の変化に強いモジュール設計**
-    検索キーワードやプロンプトのテンプレート、取得件数などの可変パラメーターを `config.py` に分離し、メインの処理ロジック（`main.py`）と切り離すことで、今後の関心領域の変化にもノーコードで対応できる高い保守性を確保しています。
+1. **サーバーレスな完全自動配信 (Automated Daily Delivery)**
+   - GitHub ActionsのCronトリガーを活用し、毎朝07:00（JST）にワークフローを厳密に自動実行
+   - サーバー維持費ゼロのクラウドネイティブな運用を実現
+2. **実務解像度に合わせた高度な検索ロジック (Advanced Filtering)**
+   - arXiv APIに対し、大カテゴリ（メディアプランニング等）と小カテゴリ（ベイズ推論、勾配ブースティング等）を掛け合わせた動的なAND検索クエリを生成
+   - 抽象的な概念論を弾き、数理モデルや機械学習の実務応用に特化した論文のみを抽出
+3. **ビジネスパーソン特化のプロンプトエンジニアリング (Business-Oriented Summarization)**
+   - LLM特有の直訳調（「〜が示唆された」等）や難解なアルゴリズム解説を排除するようシステムプロンプトを設計
+   - 「🔥10秒でわかる本論文のコア」「💡明日の実務への応用ヒント」など、NewsPicks等の経済メディアを意識した具体的なビジネス見出しによる構造化出力を強制
+4. **関心の変化に強いモジュール設計 (Modular Architecture)**
+   - 検索キーワード、取得件数、プロンプトテンプレートなどの可変パラメーターを `config.py` に完全分離
+   - メインの処理ロジック（`main.py`）を汚さずに、日々の興味関心に合わせてノーコードで柔軟なチューニングが可能
 
-## 使用技術（Tech Stack）
+## 🛠 技術スタック (Tech Stack)
+- **Language**: Python 3.10
+- **LLM / AI**: Google Gen AI SDK (Gemini 2.5 Flash)
+- **Data Source**: arXiv API (`xml.etree.ElementTree`)
+- **Notification**: LINE Messaging API (`requests`)
+- **CI/CD & Infrastructure**: GitHub Actions (Ubuntu latest)
 
-* **言語:** Python 3.10
-* **外部API:**
-    * Gemini 2.5 Flash API (Google Gen AI SDK) - 高度な自然言語処理・要約生成
-    * LINE Messaging API - モバイル端末へのPush通知
-    * arXiv API - 学術論文データのXML取得
-* **インフラ・CI/CD:** GitHub Actions (Ubuntu環境での自動実行)
-* **主要ライブラリ:** `requests`, `xml.etree.ElementTree`, `google-genai`
-
-## システムアーキテクチャ（Architecture）
-
-1.  **Trigger:** GitHub Actionsが毎朝07:00（JST）にワークフローを起動。
-2.  **Fetch:** `config.py` のキーワードに基づき、arXiv APIから最新の論文データ（XML）を取得・パース。
-3.  **Summarize:** Gemini 2.5 Flash APIに対して、論文のタイトル・概要とシステムプロンプトを送信し、構造化された要約テキストを生成。
-4.  **Notify:** 生成されたテキストをLINE Messaging API経由で指定のユーザー端末へPush送信。
+## 📁 ディレクトリ構成 (Directory Structure)
+```text
+.
+├── .github/workflows/
+│   └── ally_reseach.yml  # GitHub Actionsの定期実行ワークフロー定義
+├── config.py             # 検索キーワードやプロンプトテンプレートの設定ファイル
+├── main.py               # データ取得・要約生成・LINE送信のメインロジック
+├── requirements.txt      # 依存ライブラリ一覧（バージョン固定済み）
+├── CHANGELOG.md          # バージョンごとの変更履歴
+└── ADR.md                # アーキテクチャ決定記録（技術選定の背景と意図）
 
 ## 実行環境の構築（Setup）
 
