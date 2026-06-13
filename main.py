@@ -9,12 +9,11 @@ from google import genai
 # 設定エリア
 # ==========================================
 # 【大カテゴリ】対象とする業界やドメイン（いずれかを含む）
-MAJOR_KEYWORDS = ["Advertising", "Marketing", "Ad Tech", "Generative AI", "Marketing Data"]]
+MAJOR_KEYWORDS = ["Advertising", "Marketing", "Ad Tech", "Generative AI", "Marketing Data"]
 
 # 【小カテゴリ】具体的な技術や手法（いずれかを含む）
-MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling", "Causal Inference", "LLM",
-"Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
-MINOR_KEYWORDS = ["State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference"]
+MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling", 
+"Causal Inference", "LLM","Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
 NUM_PAPERS = 3
 
 # 取得する論文の数（スマホで毎朝サクッと読むなら3〜5件がおすすめです）
