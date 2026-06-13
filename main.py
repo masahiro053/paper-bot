@@ -5,20 +5,8 @@ import random
 import xml.etree.ElementTree as ET
 from google import genai
 
-# ==========================================
-# 設定エリア
-# ==========================================
-# 【大カテゴリ】対象とする業界やドメイン（いずれかを含む）
-MAJOR_KEYWORDS = ["Advertising", "Marketing", "Ad Tech", "Generative AI", "Marketing Data"]
-
-# 【小カテゴリ】具体的な技術や手法（いずれかを含む）
-MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling", 
-"Causal Inference", "LLM","Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
-NUM_PAPERS = 3
-
-# 取得する論文の数（スマホで毎朝サクッと読むなら3〜5件がおすすめです）
-NUM_PAPERS = 3
-# ==========================================
+# 作成した設定ファイルを読み込む
+import config
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
@@ -26,7 +14,6 @@ LINE_USER_ID = os.getenv('LINE_USER_ID')
 
 def build_arxiv_query(major_kws, minor_kws):
     """大カテゴリと小カテゴリを掛け合わせた検索クエリを作成する"""
-    # 例: (all:"Advertising" OR ...) AND (all:"Machine Learning" OR ...)
     major_parts = [f'all:"{k}"' for k in major_kws]
     minor_parts = [f'all:"{k}"' for k in minor_kws]
     
@@ -35,9 +22,9 @@ def build_arxiv_query(major_kws, minor_kws):
     
     return f"{major_query} AND {minor_query}"
 
-def fetch_arxiv_papers(query, num_papers=3):
+def fetch_arxiv_papers(query, num_papers):
     """arXiv APIから本物の論文データを取得する"""
-    url = "https://export.arxiv.org/api/query" # エラー対策: HTTPSに変更
+    url = "https://export.arxiv.org/api/query"
     random_start = random.randint(0, 10)
     
     params = {
@@ -48,7 +35,6 @@ def fetch_arxiv_papers(query, num_papers=3):
         "sortOrder": "descending"
     }
     
-    # エラー対策: User-Agentを追加
     headers = {
         "User-Agent": "DailyArxivBot/1.0"
     }
@@ -73,38 +59,13 @@ def fetch_arxiv_papers(query, num_papers=3):
         return []
 
 def summarize_paper(paper_data, client):
-    """Geminiによるスマホ（LINE）特化型・非専門家向けの要約生成"""
-    prompt = f"""
-あなたは、最新の学術論文をビジネスパーソン向けに「正確に、かつ圧倒的にわかりやすく」解説するプロのコンサルタントです。
-以下の論文（タイトルと要約）を読み、LINEで読むのに適したフォーマットで要約を作成してください。
-
-・タイトル: {paper_data['title']}
-・内容: {paper_data['abstract']}
-
-【ターゲット読者】
-日常的に学術論文を読むわけではないが、マーケティングやデータ分析の実務に活かせる「新しいアイデアや知見」を求めているビジネスパーソン。
-
-【翻訳・要約のルール】
-1. 直訳調の不自然な日本語（例：「～が示唆された」「～を提案する」など）を避け、自然で流暢なビジネス日本語で記述すること。
-2. 論文の元の主張（正確性）は絶対に曲げず、存在しない情報を捏造しないこと。
-3. 難解なアルゴリズムの詳細は追わず、「つまり、どんな賢いアプローチなのか」という直感的な理解を優先し、専門用語は極力噛み砕くこと。
-4. 各項目は箇条書きまたは2〜3行の短い文章にまとめ、スマホでの視認性を高く保つこと。
-5. 挨拶や前置きは一切不要。
-
-【出力フォーマット】（以下の見出しを厳密に使用してください）
-
-🎯 なぜこの研究が必要だった？（背景・課題）
-・
-
-💡 どんな「賢いアイデア」？（アプローチ）
-・
-
-📊 結局、何がわかった？（結論・成果）
-・
-
-🚀 実務へのヒント（アイデアの種）
-・(読者が「なるほど、自社の〇〇の改善に使えるかも」と知見を深められるようなインスピレーションを1〜2文で提案)
-"""
+    """config.pyからプロンプトを読み込み要約を生成する"""
+    # config.pyのテンプレートに、実際のタイトルと概要を埋め込む
+    prompt = config.PROMPT_TEMPLATE.format(
+        title=paper_data['title'],
+        abstract=paper_data['abstract']
+    )
+    
     try:
         response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         return response.text
@@ -113,6 +74,7 @@ def summarize_paper(paper_data, client):
         return "⚠️ 要約生成に失敗しました。"
 
 def send_to_line(message):
+    """LINEにメッセージを送信する"""
     url = "https://api.line.me/v2/bot/message/push"
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}"}
     payload = {"to": LINE_USER_ID, "messages": [{"type": "text", "text": message}]}
@@ -125,11 +87,12 @@ def main():
         
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    # 検索クエリの組み立て
-    query = build_arxiv_query(MAJOR_KEYWORDS, MINOR_KEYWORDS)
+    # configからキーワードを読み込んで検索クエリを作成
+    query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
     print(f"Searching for: {query}")
     
-    papers = fetch_arxiv_papers(query, NUM_PAPERS)
+    # configから取得件数を読み込んで論文を取得
+    papers = fetch_arxiv_papers(query, config.NUM_PAPERS)
     
     if not papers:
         send_to_line("⚠️ 条件に合致する最新論文が見つかりませんでした。")
@@ -138,8 +101,7 @@ def main():
     for i, paper in enumerate(papers):
         summary = summarize_paper(paper, client)
         
-        # LINE用のメッセージフォーマット（見出しをスッキリさせて区切り線をスマホサイズに調整）
-        msg = (f"📚 論文速報 ({i+1}/{NUM_PAPERS})\n"
+        msg = (f"📚 論文速報 ({i+1}/{config.NUM_PAPERS})\n"
                f"━━━━━━━━━━━━\n"
                f"💡 {paper['title']}\n"
                f"📅 {paper['year']}\n"
