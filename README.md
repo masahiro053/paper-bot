@@ -44,9 +44,8 @@
 └── ADR.md                # アーキテクチャ決定記録（技術選定の背景と意図）
 ```
 
-## 実行環境の構築（Setup）
-
-ローカル環境で動作確認を行う場合の手順です。
+## 🚀 デプロイと環境構築の注意点 (Deployment Notes)
+本システムはGitHub Actions上での自動実行を前提としていますが、ローカル環境での動作確認やプロンプトのテストを行う際は以下の手順を実行してください。
 
 1. リポジトリのクローン
 ```bash
@@ -61,9 +60,9 @@ pip install -r requirements.txt
 
 3. 環境変数の設定
 実行時に以下の環境変数を設定してください。
-- GEMINI_API_KEY: Gemini APIの認証キー
-- LINE_CHANNEL_ACCESS_TOKEN: LINE Botのアクセストークン
-- LINE_USER_ID: 送信先のLINEユーザーID
+- `GEMINI_API_KEY`: Gemini APIの認証キー
+- `LINE_CHANNEL_ACCESS_TOKEN`: LINE Botのアクセストークン
+- `LINE_USER_ID`: 送信先のLINEユーザーID
 
 4. スクリプトの実行
 ```bash
