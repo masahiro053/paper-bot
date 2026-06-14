@@ -6,15 +6,21 @@ on:
     - cron: '0 22 * * *'
   workflow_dispatch: # 手動で実行したい場合用
 
+# ==========================================
+# 💡 追加：Node.js 24への強制アップグレード設定
+# ==========================================
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # ← v3 から v4 に変更
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5  # ← v4 から v5 に変更
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
