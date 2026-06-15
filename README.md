@@ -68,3 +68,44 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+---
+
+## 🔄 開発・運用ワークフロー (Development Workflow)
+
+本システムは、毎朝の定期実行時にボットが `history.txt`（送信履歴）を自動更新し、GitHubへプッシュする仕様となっています。
+そのため、GitHub上のリポジトリが常に「ローカル環境より1歩進んだ状態」になります。
+
+手元のパソコンで設定変更やコードの改修を行う際は、Gitの衝突（コンフリクト）を防ぐため、以下のルーティンを必ず守って開発を行ってください。
+
+### 📌 通常の開発ルーティン（鉄則）
+
+作業を始める前に、必ず「ボットが更新した最新の履歴」を手元にダウンロードしてから作業を開始します。
+
+1. **作業開始前の同期（必須）**
+```bash
+   git pull origin main
+```
+2. コードの修正・設定値の変更
+3. 変更のステージングとコミット
+```bash
+   git add .
+   git commit -m "feat: 〇〇の機能を追加"
+```
+4. 変更のステージングとコミット
+```bash
+   git push origin main
+```
+
+### 🚑 push時に「rejected (fetch first)」エラーが出た場合の対処法
+git pull を忘れて作業を進め、git push 時にエラーで弾かれてしまった場合は、以下のコマンドで後から歴史を安全に合流（マージ）させてください。
+```bash
+# 1. マージ方式の設定（初回のみでOK）
+git config pull.rebase false
+
+# 2. 自動的に合流させる（--no-edit で入力画面をスキップ）
+git pull origin main --no-edit
+
+# 3. 再度プッシュする
+git push origin main
+```
