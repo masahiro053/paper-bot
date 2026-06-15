@@ -8,7 +8,6 @@ MAJOR_KEYWORDS = ["Advertising", "Marketing", "Ad Tech", "Generative AI", "Marke
 # 【小カテゴリ】具体的な技術や手法（いずれかを含む）
 MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling", 
 "Causal Inference", "LLM","Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
-NUM_PAPERS = 3
 
 # 取得する論文の数（スマホで毎朝サクッと読むなら3〜5件がおすすめです）
 NUM_PAPERS = 3
@@ -45,3 +44,8 @@ PROMPT_TEMPLATE = """
 💡【明日の実務への応用ヒント】
 ・(「自社のメディアプランニングやデータ分析にこう組み込めるかも」と読者が具体的にアクションをイメージできるアイデアを1〜2文で提示)
 """
+
+==========================================
+# 💡 追加：過去に取得した論文IDを保存するファイル名
+# ==========================================
+HISTORY_FILE = "history.txt"
