@@ -10,7 +10,7 @@ MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling",
 "Causal Inference", "LLM","Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
 
 # 取得する論文の数（スマホで毎朝サクッと読むなら3〜5件がおすすめです）
-NUM_PAPERS = 3
+NUM_PAPERS = 5
 
 # Geminiによる要約生成用のプロンプトテンプレート
 PROMPT_TEMPLATE = """
