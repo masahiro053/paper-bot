@@ -80,20 +80,25 @@ def main():
     # 1. 履歴の読み込み
     history_ids = load_history(config.HISTORY_FILE)
     
-    # 2. 論文を少し多め（15件）に取得
+    # 2. 論文を少し多め（20件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
-    papers = fetch_arxiv_papers(query, fetch_count=15)
+    papers = fetch_arxiv_papers(query, fetch_count=20)
     
     new_papers_count = 0
     new_sent_ids = []
     
     # 3. 取得した論文を1件ずつチェック
+    # 3. 取得した論文を1件ずつチェック
     for paper in papers:
-        # すでに過去に送ったことがある論文ならスキップ！
         if paper['id'] in history_ids:
             continue
             
-        summary = summarize_paper(paper, client)
+        # 💡 APIの混雑エラー（503）などをキャッチしてスキップする処理を追加
+        try:
+            summary = summarize_paper(paper, client)
+        except Exception as e:
+            print(f"⚠️ 論文 '{paper['title']}' の要約中にAPIエラーが発生したためスキップします: {e}")
+            continue # この論文は諦めて、次の論文の処理へ進む
         
         msg = (f"📚 論文速報 ({new_papers_count+1}/{config.NUM_PAPERS})\n━━━━━━━━━━━━\n"
                f"💡 {paper['title']}\n📅 {paper['year']}\n━━━━━━━━━━━━\n\n"
