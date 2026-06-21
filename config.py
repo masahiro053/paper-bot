@@ -3,11 +3,34 @@
 # ==========================================
 
 # 【大カテゴリ】対象とする業界やドメイン（いずれかを含む）
-MAJOR_KEYWORDS = ["Advertising", "Marketing", "Ad Tech", "Generative AI", "Marketing Data"]
+MAJOR_KEYWORDS = [
+    "Advertising", 
+    "Marketing", 
+    "Ad Tech", 
+    "Marketing Data",
+    "Marketing Mix Modeling", # 小カテゴリから移動
+    "Generative AI",
+    "Digital Transformation"  # 組織のデータ活用基盤やDX推進の文脈を拾うため追加
+]
 
 # 【小カテゴリ】具体的な技術や手法（いずれかを含む）
-MINOR_KEYWORDS = ["Machine Learning", "Optimization", "Mix Modeling", 
-"Causal Inference", "LLM","Bayesian", "State Space Models", "Gradient Boosting", "Bayesian", "Time Series", "Causal Inference","Marketing Mix Modeling"]
+MINOR_KEYWORDS = [
+    "Machine Learning", 
+    "Optimization", 
+    "Time Series", 
+    "Bayesian",               # 重複排除
+    "State Space Models", 
+    "Causal Inference",       # 重複排除
+    "Uplift Modeling",        # 追加: 真の広告効果の測定
+    "Attribution",            # 追加: 貢献度評価
+    "Gradient Boosting",
+    "GBDT",                   # 追加: 表記揺れ対応
+    "Ensemble",               # 追加: 予測精度の向上
+    "LLM",
+    "RAG",                    # 追加: 外部データ連携
+    "Agents",                  # 追加: 自律型AI
+    "LLM"
+]
 
 # 取得する論文の数（スマホで毎朝サクッと読むなら3〜5件がおすすめです）
 NUM_PAPERS = 5

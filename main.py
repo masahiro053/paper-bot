@@ -82,12 +82,11 @@ def main():
     
     # 2. 論文を少し多め（20件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
-    papers = fetch_arxiv_papers(query, fetch_count=20)
+    papers = fetch_arxiv_papers(query, fetch_count=50)
     
     new_papers_count = 0
     new_sent_ids = []
     
-    # 3. 取得した論文を1件ずつチェック
     # 3. 取得した論文を1件ずつチェック
     for paper in papers:
         if paper['id'] in history_ids:
@@ -110,7 +109,7 @@ def main():
         new_sent_ids.append(paper['id'])
         new_papers_count += 1
         
-        # 設定した件数（3件）に達したらループを終了
+        # 設定した件数に達したらループを終了
         if new_papers_count >= config.NUM_PAPERS:
             break
             
