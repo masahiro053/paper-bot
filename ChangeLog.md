@@ -32,3 +32,13 @@
 - **GitHub Actionsの環境警告**: Node.js 20の非推奨化に伴う警告を解消するため、環境変数 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` をワークフローに設定
 - **実行エラー（Exit code 1）の解消**: 新規論文がなく `history.txt` が生成されなかった場合に `git add` が失敗するバグを防ぐため、ファイル存在チェック (`if [ -f history.txt ]; then`) の条件分岐を追加
 - `config.py` 内のコメントアウト記述ミスによる `SyntaxError` を修正
+
+---
+
+## [2026-06-21]
+
+### Changed（変更）
+- **検索キーワードの最適化**: `config.py` 内の arXiv 検索用キーワードリストを再構成し、論文のノイズ削減とマッチング精度を向上
+  - 大カテゴリ（`MAJOR_KEYWORDS`）に `Digital Transformation` を追加し、`Marketing Mix Modeling` を小カテゴリから移動してドメインとして定義
+  - 小カテゴリ（`MINOR_KEYWORDS`）における重複（`Bayesian`, `Causal Inference`）を削除
+  - 実務応用への解像度を高めるため、新たな手法・技術キーワード（`Uplift Modeling`, `Attribution`, `GBDT`, `Ensemble`, `RAG`, `Agents`）を追加
