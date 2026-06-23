@@ -80,24 +80,25 @@ def main():
     # 1. 履歴の読み込み
     history_ids = load_history(config.HISTORY_FILE)
     
-    # 2. 論文を少し多め（20件）に取得
+    # 2. 論文を少し多め（50件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
     papers = fetch_arxiv_papers(query, fetch_count=50)
     
     new_papers_count = 0
     new_sent_ids = []
     
-    # 3. 取得した論文を1件ずつチェック
+# 3. 取得した論文を1件ずつチェック
     for paper in papers:
         if paper['id'] in history_ids:
             continue
-            
-        # 💡 APIの混雑エラー（503）などをキャッチしてスキップする処理を追加
+
         try:
             summary = summarize_paper(paper, client)
         except Exception as e:
             print(f"⚠️ 論文 '{paper['title']}' の要約中にAPIエラーが発生したためスキップします: {e}")
-            continue # この論文は諦めて、次の論文の処理へ進む
+            # 💡 追加：エラーが起きてスキップする時も、APIの制限を回避するために15秒休む
+            time.sleep(15) 
+            continue
         
         msg = (f"📚 論文速報 ({new_papers_count+1}/{config.NUM_PAPERS})\n━━━━━━━━━━━━\n"
                f"💡 {paper['title']}\n📅 {paper['year']}\n━━━━━━━━━━━━\n\n"
@@ -105,15 +106,14 @@ def main():
                
         send_to_line(msg)
         
-        # 新しく送ったリストに追加
         new_sent_ids.append(paper['id'])
         new_papers_count += 1
         
-        # 設定した件数に達したらループを終了
         if new_papers_count >= config.NUM_PAPERS:
             break
             
-        time.sleep(5)
+        # 💡 変更：1分間に5回という無料枠の制限を超えないよう、5秒から15秒に延長
+        time.sleep(15)
         
     # 4. 新しく送った論文があれば、履歴ファイルに追記して保存
     if new_sent_ids:
