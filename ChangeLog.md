@@ -42,3 +42,14 @@
   - 大カテゴリ（`MAJOR_KEYWORDS`）に `Digital Transformation` を追加し、`Marketing Mix Modeling` を小カテゴリから移動してドメインとして定義
   - 小カテゴリ（`MINOR_KEYWORDS`）における重複（`Bayesian`, `Causal Inference`）を削除
   - 実務応用への解像度を高めるため、新たな手法・技術キーワード（`Uplift Modeling`, `Attribution`, `GBDT`, `Ensemble`, `RAG`, `Agents`）を追加
+
+  ---
+
+## [2026-06-23]
+
+### Added（追加）
+- **APIエラーの例外処理**: `main.py` の要約生成処理（`summarize_paper`）を `try-except` ブロックで囲み、Google側のサーバー高負荷（503 UNAVAILABLE等）発生時にプログラムが強制終了せず、該当論文をスキップして処理を継続するフェイルセーフ機能を実装
+
+### Changed（変更）
+- **レート制限（Rate Limit）の厳格化**: Gemini 2.5 Flashの無料枠制限（1分間に5リクエスト）を確実に遵守するため、ループ内の待機時間（`time.sleep`）を5秒から15秒へ延長
+- **取得バッファの拡張**: 既読スキップやAPIエラーによるスキップが連続した場合でも、目標配信数（3件）を確保できるよう、arXivからの初期取得件数（`fetch_count`）を15件から50件へと大幅に拡張
