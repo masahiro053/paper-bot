@@ -40,7 +40,7 @@ def fetch_arxiv_papers(query, fetch_count=15):
     }
     headers = {"User-Agent": "DailyArxivBot/1.0"}
     
-    response = requests.get(url, params=params, headers=headers, timeout=15)
+    response = requests.get(url, params=params, headers=headers, timeout=60)
     response.raise_for_status()
     
     root = ET.fromstring(response.text)
