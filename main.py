@@ -80,14 +80,27 @@ def main():
     # 1. 履歴の読み込み
     history_ids = load_history(config.HISTORY_FILE)
     
+
     # 2. 論文を少し多め（100件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
-    papers = fetch_arxiv_papers(query, fetch_count=100)
     
+    # 💡 追加：arXiv APIのエラーもキャッチして綺麗に終了させる
+    try:
+        papers = fetch_arxiv_papers(query, fetch_count=100)
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 429:
+            print("⚠️ arXiv APIの利用制限（429 Too Many Requests）に達しました。しばらく時間をおいてから再実行してください。")
+        else:
+            print(f"⚠️ arXiv APIで通信エラーが発生しました: {e}")
+        return  # ここでプログラムを安全に終了させる
+    except Exception as e:
+        print(f"⚠️ arXivからの論文取得中に予期せぬエラーが発生しました: {e}")
+        return  # ここでプログラムを安全に終了させる
+
     new_papers_count = 0
-    new_sent_ids = []
     
-# 3. 取得した論文を1件ずつチェック
+    
+    # 3. 取得した論文を1件ずつチェック
     for paper in papers:
         if paper['id'] in history_ids:
             continue
