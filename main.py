@@ -80,9 +80,9 @@ def main():
     # 1. 履歴の読み込み
     history_ids = load_history(config.HISTORY_FILE)
     
-    # 2. 論文を少し多め（50件）に取得
+    # 2. 論文を少し多め（100件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
-    papers = fetch_arxiv_papers(query, fetch_count=50)
+    papers = fetch_arxiv_papers(query, fetch_count=100)
     
     new_papers_count = 0
     new_sent_ids = []
@@ -113,7 +113,7 @@ def main():
             break
             
         # 💡 変更：1分間に5回という無料枠の制限を超えないよう、5秒から15秒に延長
-        time.sleep(15)
+        time.sleep(5)
         
     # 4. 新しく送った論文があれば、履歴ファイルに追記して保存
     if new_sent_ids:
