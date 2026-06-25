@@ -28,8 +28,8 @@ def build_arxiv_query(major_kws, minor_kws):
     minor_query = "(" + " OR ".join([f'all:"{k}"' for k in minor_kws]) + ")"
     return f"{major_query} AND {minor_query}"
 
-def fetch_arxiv_papers(query, fetch_count=15):
-    """指定した件数（少し多め）の論文データを取得する"""
+def fetch_arxiv_papers(query, fetch_count=100):
+    """指定した件数の論文データを取得する"""
     url = "https://export.arxiv.org/api/query"
     params = {
         "search_query": query,
@@ -40,6 +40,7 @@ def fetch_arxiv_papers(query, fetch_count=15):
     }
     headers = {"User-Agent": "DailyArxivBot/1.0"}
     
+    # 💡 arXivの重い処理にも耐えられるよう timeout=60 に設定
     response = requests.get(url, params=params, headers=headers, timeout=60)
     response.raise_for_status()
     
@@ -61,13 +62,20 @@ def summarize_paper(paper_data, client):
         title=paper_data['title'],
         abstract=paper_data['abstract']
     )
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    # 💡 テスト中の「1日20回制限」を回避するため、安定の 1.5-flash に設定しています
+    response = client.models.generate_content(model='gemini-1.5-flash', contents=prompt)
     return response.text
 
 def send_to_line(message):
     url = "https://api.line.me/v2/bot/message/push"
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}"}
-    payload = {"to": LINE_USER_ID, "messages": [{"type": "text", "text": message}]}
+    headers = {
+        "Content-Type": "application/json", 
+        "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}"
+    }
+    payload = {
+        "to": LINE_USER_ID, 
+        "messages": [{"type": "text", "text": message}]
+    }
     requests.post(url, headers=headers, json=payload)
 
 def main():
@@ -80,11 +88,10 @@ def main():
     # 1. 履歴の読み込み
     history_ids = load_history(config.HISTORY_FILE)
     
-
-    # 2. 論文を少し多め（100件）に取得
+    # 2. 論文を多め（100件）に取得
     query = build_arxiv_query(config.MAJOR_KEYWORDS, config.MINOR_KEYWORDS)
     
-    # 💡 追加：arXiv APIのエラーもキャッチして綺麗に終了させる
+    # 💡 arXiv APIのエラーをキャッチして綺麗に終了させる
     try:
         papers = fetch_arxiv_papers(query, fetch_count=100)
     except requests.exceptions.HTTPError as e:
@@ -92,25 +99,27 @@ def main():
             print("⚠️ arXiv APIの利用制限（429 Too Many Requests）に達しました。しばらく時間をおいてから再実行してください。")
         else:
             print(f"⚠️ arXiv APIで通信エラーが発生しました: {e}")
-        return  # ここでプログラムを安全に終了させる
+        return
     except Exception as e:
         print(f"⚠️ arXivからの論文取得中に予期せぬエラーが発生しました: {e}")
-        return  # ここでプログラムを安全に終了させる
-
+        return
+        
+    # 💡 先ほどのエラー原因だった変数をしっかり定義！
     new_papers_count = 0
-    
+    new_sent_ids = []
     
     # 3. 取得した論文を1件ずつチェック
     for paper in papers:
+        # すでに送信済みの論文はスキップ
         if paper['id'] in history_ids:
             continue
-
+            
+        # 💡 Gemini APIのエラーをキャッチしてスキップさせる
         try:
             summary = summarize_paper(paper, client)
         except Exception as e:
             print(f"⚠️ 論文 '{paper['title']}' の要約中にAPIエラーが発生したためスキップします: {e}")
-            # 💡 追加：エラーが起きてスキップする時も、APIの制限を回避するために15秒休む
-            time.sleep(15) 
+            time.sleep(15) # エラー時もAPI制限回避のために休む
             continue
         
         msg = (f"📚 論文速報 ({new_papers_count+1}/{config.NUM_PAPERS})\n━━━━━━━━━━━━\n"
@@ -122,11 +131,12 @@ def main():
         new_sent_ids.append(paper['id'])
         new_papers_count += 1
         
+        # 目標件数（3件）に達したらループを抜ける
         if new_papers_count >= config.NUM_PAPERS:
             break
             
-        # 💡 変更：1分間に5回という無料枠の制限を超えないよう、5秒から15秒に延長
-        time.sleep(5)
+        # 💡 Geminiの無料枠制限（1分間に5回）を超えないよう15秒休む
+        time.sleep(15)
         
     # 4. 新しく送った論文があれば、履歴ファイルに追記して保存
     if new_sent_ids:
