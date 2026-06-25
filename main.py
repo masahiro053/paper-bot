@@ -62,8 +62,8 @@ def summarize_paper(paper_data, client):
         title=paper_data['title'],
         abstract=paper_data['abstract']
     )
-    # 💡 テスト中の「1日20回制限」を回避するため、安定の 1.5-flash に設定しています
-    response = client.models.generate_content(model='gemini-1.5-flash', contents=prompt)
+    # 💡 新しいGenAI SDKとの互換性を確保するため、gemini-2.5-flash を指定
+    response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
     return response.text
 
 def send_to_line(message):
@@ -104,7 +104,7 @@ def main():
         print(f"⚠️ arXivからの論文取得中に予期せぬエラーが発生しました: {e}")
         return
         
-    # 💡 先ほどのエラー原因だった変数をしっかり定義！
+    # 💡 変数をしっかり定義
     new_papers_count = 0
     new_sent_ids = []
     
